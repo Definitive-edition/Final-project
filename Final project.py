@@ -11,7 +11,8 @@ character_file_path = "favorite_character.md"
 game_file_path = "favorite_game.md"
 movie_file_path = "favorite_movie.md"
 random_jokes = "random_jokes.md"
-
+'''
+#this function is for reading a given file and returning a dictionary object with key value pair
 def joke_file_read(joke_file_path):   
     joke_dict = {} #initializes an empty dictionary to store the jokes
     with open(joke_file_path, "r") as file:
@@ -27,11 +28,7 @@ def joke_file_read(joke_file_path):
 
     return joke_dict
 
-    
-
-
-
-joke_dict = joke_file_read(joke_file_path) #function call assigned to joke dict.
+joke_dict = joke_file_read(joke_file_path) #function call assigned to joke dict.'''
 
 #this function tells a joke for a selected category. Takes file path of jokes file, reads the file and based on the selected joke category
 #it displays a random joke in the category.
@@ -54,17 +51,16 @@ def tell_joke(pJoke_file_path):
                 #print(f"current line in joke file {line}")
                 match = joke_pattern.search(line)
                 if match: 
-                    #print(f"value of match: {match.string}")
                     joke_list.append(match.string) 
 
-        #print(f"Size of joke_list: {len(joke_list)}")
+       # print(f"Size of joke_list: {len(joke_list)}")
         randomJokeIndex = random.randint(0, len(joke_list))
         print(f"Here is your joke: {joke_list[randomJokeIndex]}")
     except ValueError: 
         print("Invalid value")
        
 
-
+#function that displays submenu for jokes. User can add joke for a selected category. The jokes entered will be saved in jokes.md
 def add_joke(): 
     print("1. NASA related joke")
     print("2. Dog jokes")
@@ -81,7 +77,7 @@ def add_joke():
             return
         
         #\b matches any word boundary such as spaces, dashes, commas, semicolons and more ensures that the 1-5 isn't part of a larger number.
-        # [1-5] is a character class matching any single digit from 1 to 5. the digit at this position must be one of these digits.
+        # [1-6] is a character class matching any single digit from 1 to 6. the digit at this position must be one of these digits.
         if not re.match(r"\b[1-6]\b",user_input):
             print("Invalid input. Enter a valid value between 1 and 6")
 
@@ -121,7 +117,7 @@ def show_joke_file(joke_file_path):
 
 
 
-
+#this is the main program for engaging user on favorite things. User can choose favorite character, movie and games
 def favorite_thing():
     topics = ["Favorite character","Favorite Movie", "Favorite Game"]
        
@@ -134,7 +130,7 @@ def favorite_thing():
         print("3. Favorite Game")
         topic_choice = int(input("Choose a topic between 1 and 3.\n "))
        
-
+        #alternative to if-else using dictionary instead
         favorite_thing_dict = {
 
             1: favorite_character_analysis,
@@ -157,7 +153,9 @@ def favorite_thing():
         print("Seriously! nice try. You really thought you could get away with entering anything other than a number")
      
 
-
+#this function is for character analysis within favorite things submenu. 
+#this function will take user input for a character and displays brief description of the character
+#Alternatively, user can add a character to the file.
 def favorite_character_analysis(): 
         character_info = {}
         with open(character_file_path, 'r') as file:
@@ -180,13 +178,6 @@ def favorite_character_analysis():
                     if character == "exit":
                         print("exiting...")
                         return
-
-           
-            
-           
-
-
-
                     if character in character_info: 
                         print(character_info[character.lower()])
                     else: 
@@ -208,7 +199,8 @@ def favorite_character_analysis():
 
       
 
-
+#function to display about a game or add a game description
+#consider making an api call to online games database
 def favorite_game_analysis(): 
     try: 
         game = input("Welcome to favorite game analysis. Enter your favorite game:\n ")
@@ -229,7 +221,7 @@ def favorite_game_analysis():
     except ValueError: 
         print("Invalid value entered")
 
-
+#function to display about a movie
 def favorite_movie_analysis(): 
         # consider making api call for games not in file.
     try: 
@@ -257,7 +249,8 @@ def favorite_movie_analysis():
 
 
 
-
+#function for authoring an adventure story
+#consider incorporating an AI module for script generation
 def adventure_story(): 
 
     try: 
@@ -281,7 +274,7 @@ def adventure_story():
     except ValueError: 
         print("Invalid value please try again.")
 
-
+#main menu for adventure story
 def adventure_story_menu():
     print("Welcome to the adventure story menu, choose a number between 1 and 2")
    
@@ -302,9 +295,10 @@ def adventure_story_menu():
     except ValueError: 
         print("Invalid input, enter a number")
 
-
+#function for trivia
+#consider adding file based trivia and then look for trivia api.
 def trivia(): 
-    print("Welcome to python trivia! there will be 5 questions.")
+    print("Welcome to trivia! there will be 5 questions.")
         # consider making api call for trivia database
     questions_and_answers = {
         "What is the capital of France?": "paris\n", 
@@ -329,7 +323,7 @@ def trivia():
 
     print("Congratulations! You completed trivia.")
            
-
+#trivia main menu
 def trivia_menu():
     print("Welcome to trivia, would you like to start?")
     try: 
@@ -353,7 +347,7 @@ def trivia_menu():
         print("Invalid input, please enter number")
 
 
-            
+#main menu for jokes          
 def joke_menu(): 
     print("Welcome to the joke menu. Here are your options\n")
     try:
@@ -389,7 +383,7 @@ def joke_menu():
 
 
 
-
+#main program where code starts
 def main():
     while True:
         print("Hello and welcome to our expanded menu. Here is the list of things to do.")
