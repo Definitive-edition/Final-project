@@ -3,7 +3,7 @@
 #Final Project
 #CIS 153 L8
 #Program description: An expanded entertainment menu with a bit more fun activities to do. 
-import pyjokes 
+import random
 import re 
 #file variables
 joke_file_path = "jokes.md"
@@ -33,15 +33,36 @@ def joke_file_read(joke_file_path):
 
 joke_dict = joke_file_read(joke_file_path) #function call assigned to joke dict.
 
+#this function tells a joke for a selected category. Takes file path of jokes file, reads the file and based on the selected joke category
+#it displays a random joke in the category.
+def tell_joke(pJoke_file_path):
+    joke_list = [] 
+    print("1. NASA related joke")
+    print("2. Dog jokes")
+    print("3. Dinsosaur jokes ")
+    print("4. Lawyer jokes")
+    print("5. Miscellaneous jokes")
+    print("6. exit joke menu")
 
-def tell_joke(random_jokes): 
-    with open(random_jokes, 'a') as file: 
-        random_joke = pyjokes.get_joke(language="en", category="all")
+    try:
+        user_input = input("Select a category for the joke (1-6) or press exit to go back to main menu: ")
+        regPattern = "^" + user_input
 
-        file.write(random_joke + "\n")
+        with open(pJoke_file_path, 'r') as file:
+            joke_pattern = re.compile(regPattern)
+            for line in file: 
+                #print(f"current line in joke file {line}")
+                match = joke_pattern.search(line)
+                if match: 
+                    #print(f"value of match: {match.string}")
+                    joke_list.append(match.string) 
 
-        print(random_joke)
-
+        #print(f"Size of joke_list: {len(joke_list)}")
+        randomJokeIndex = random.randint(0, len(joke_list))
+        print(f"Here is your joke: {joke_list[randomJokeIndex]}")
+    except ValueError: 
+        print("Invalid value")
+       
 
 
 def add_joke(): 
@@ -82,6 +103,12 @@ def add_joke():
         print("Invalid input. Enter a valid value for category")
         
 
+
+
+
+
+#This function is called from jokes submenu for show all jokes option.
+#Opens file path passed in the parameter in read mode and prints to the terminal the contents of the file
 def show_joke_file(joke_file_path):
     with open (joke_file_path, "r") as file: 
         for line in file: 
@@ -333,8 +360,8 @@ def joke_menu():
         while True:
             print("1. Add a joke")
             print("2. Tell me a joke")
-            print("3. Show jokes")
-            print("4. Show random jokes")
+            print("3. Show all jokes")
+            print("4. Show all random jokes")
             print("5. Return to main program\n")
             choice = int(input("Choose a number between 1 and 5: \n"))
 
@@ -343,7 +370,7 @@ def joke_menu():
                 add_joke()
     
             elif choice == 2: 
-                tell_joke(random_jokes)
+                tell_joke(joke_file_path)
             elif choice == 3:
                 show_joke_file(joke_file_path)
             
