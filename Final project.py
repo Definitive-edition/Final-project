@@ -5,30 +5,17 @@
 #Program description: An expanded entertainment menu with a bit more fun activities to do. 
 import random
 import re 
+from colorama import Fore, Back, Style
+import requests
+from functools import partial
+
 #file variables
 joke_file_path = "jokes.md"
 character_file_path = "favorite_character.md"
 game_file_path = "favorite_game.md"
 movie_file_path = "favorite_movie.md"
 random_jokes = "random_jokes.md"
-'''
-#this function is for reading a given file and returning a dictionary object with key value pair
-def joke_file_read(joke_file_path):   
-    joke_dict = {} #initializes an empty dictionary to store the jokes
-    with open(joke_file_path, "r") as file:
-        for line in file: #iterates over each line in the file
-            parts = line.strip().split(":")#whitespaces are stripped from the line and then splitted into a list of strings using the colon which stores the result in parts.
-            if len(parts) >= 2:#checks if there are 2 elements in the parts list
-                key = int(parts[0])#conversion of the first element of parts into an int which is assigned to the key variable. 
-                value = parts[1].strip()# The Second element removes whitespace and is assigned to value.
-                joke_dict[key] = f"{key}: {value}" #added entry to the dictionary
-
-            else: 
-                print(f"invalid line format in {joke_file_path}: {line}") #activates if the line doesn't have two parts.
-
-    return joke_dict
-
-joke_dict = joke_file_read(joke_file_path) #function call assigned to joke dict.'''
+trivia_file = "trivia_questions.md"
 
 #this function tells a joke for a selected category. Takes file path of jokes file, reads the file and based on the selected joke category
 #it displays a random joke in the category.
@@ -55,7 +42,11 @@ def tell_joke(pJoke_file_path):
 
        # print(f"Size of joke_list: {len(joke_list)}")
         randomJokeIndex = random.randint(0, len(joke_list))
+        selected_joke = joke_list[randomJokeIndex]
         print(f"Here is your joke: {joke_list[randomJokeIndex]}")
+
+        return selected_joke
+    
     except ValueError: 
         print("Invalid value")
        
@@ -134,7 +125,7 @@ def favorite_thing():
         favorite_thing_dict = {
 
             1: favorite_character_analysis,
-            2: favorite_movie_analysis,
+            2: partial(favorite_movie_analysis, movie_file_path),
             3: favorite_game_analysis
         }
 
@@ -171,7 +162,7 @@ def favorite_character_analysis():
             # the key and the value(before and after colon)
 
 
-        while True:
+        while character is not True:
                 try:
                     character = input("Welcome to favorite character analysis. Enter your favorite character or enter exit:\n ")
 
@@ -222,30 +213,49 @@ def favorite_game_analysis():
         print("Invalid value entered")
 
 #function to display about a movie
-def favorite_movie_analysis(): 
+def favorite_movie_analysis(movie_file_path): 
         # consider making api call for games not in file.
     try: 
         movie = input("Welcome to favorite movie/anime/show analysis. Enter you favorite movie:\n")
 
         with open(movie_file_path, 'r') as file:
-            #dict converts list of key-value pairs created by split into a dictionary
-            #line.strip removes whitespaces from each line
-            #line.strip().split(":" , 1) splits each line at the first colon and the 1 is the second argument to split which shows the split should occur once. 
-            #if additonal colons in the line are present, they'll be part of a second element.
-            movie_info = dict(line.strip().split(':', 1) for line in file)
+            movie_info = {}
 
 
 
-        if movie.lower() in movie_info: 
-            print(movie_info[movie.lower()])
+            for line in file: 
+
+                key, value = map(str.strip, line.split (':', 1))
+
+                movie_info[key] = value 
 
 
-        else:
-            print("Invalid movie entered")
+        if movie in movie_info: 
+            print(f"Information about your favorite movie '{movie}':")
+            print(f"Genre: {movie_info[movie]}")
 
 
-    except ValueError:
-        print("This is a movie one, what are you doing?")
+        else: 
+            print(f"Sorry, information about '{movie}' not available")
+
+            description = input(f"Please provide a description for '{movie}'")
+
+
+
+            movie_info[movie] = description
+
+
+            with open(movie_file_path, 'a') as file: 
+                file.write(f"\n{movie}: {description}")
+                print(f"Information about '{movie}' has been added to the file")
+
+
+
+    except FileNotFoundError:
+        print(f"File not found at {movie_file_path}")
+
+    except Exception as e: 
+        print(f"An error occured {e}")
 
 
 
@@ -258,7 +268,7 @@ def adventure_story():
         print("You find a mysterious cloud shaped key that leads into a door that you don't know where it goes and a mysterious drink. Which do you choose?")
         adventure = input("mysterious drink or cloud key: \n").lower()
 
-        while True: 
+        while adventure: 
             if adventure.lower() == "mysterious drink": 
                 print("You have become immortal and are immune to death.")
                 break
@@ -297,24 +307,35 @@ def adventure_story_menu():
 
 #function for trivia
 #consider adding file based trivia and then look for trivia api.
+
+#function definiton that takes trivia_file as parameter which is the path to the trivia questions file
+def load_questions(trivia_file):
+    #initializes an empty dictionary which stores the loaded trivia questions
+    questions_and_answers = {}
+    #opens the file in read mode using a with statement which ensures it properly closes after reading.
+    with open(trivia_file, 'r') as file: 
+        #iterates over each line in the opened file
+        for line in file: 
+            #splits the line at colon and removes whitespaces using str.strip which results in two elements, the question and answer.
+            question, answer = map(str.strip, line.split(':', 1))
+            #key_value pair to the question and answers dictionary where the key is the question and the value is the answer
+            questions_and_answers[question] = answer
+    #closes file automatically by returning the dictionary
+    return questions_and_answers
+
+
+
+
 def trivia(): 
     print("Welcome to trivia! there will be 5 questions.")
-        # consider making api call for trivia database
-    questions_and_answers = {
-        "What is the capital of France?": "paris\n", 
-        "What is the first fire emblem game to be released in the west?": "fire emblem 7\n",
-        "What is the latest fire emblem game?": "fire emblem 17\n",
-        "How many holes in a straw?": "one\n", 
-        "True or false: Radiant dawn has 4 parts to the game.": "true\n"
+    # consider making api call for trivia database
+    questions_and_answers = load_questions(trivia_file)
 
-    }
-    #iterate over each question and it's corresponding correct answer in the dictionary.
     for question, correct_answer in questions_and_answers.items(): 
-
         while True:
             answer = input(question + '\n')
 
-            if answer.lower() == correct_answer: 
+            if answer.lower() == correct_answer.lower(): 
                 print("That's correct\n")
                 break
             else: 
@@ -326,32 +347,32 @@ def trivia():
 #trivia main menu
 def trivia_menu():
     print("Welcome to trivia, would you like to start?")
-    try: 
-        while True: 
-            
-            print("1. Start trivia")
-            print("2. Return to main menu ")
-            choice = int(input("Enter you choice between 1 and 2: "))
+    while True: 
+        print("1. Start trivia")
+        print("2. Return to main menu ")
+        choice = int(input("Enter you choice between 1 and 2: "))
 
-            if choice == 1: 
-                trivia()
+        if choice == 1: 
+            trivia()
 
-            elif choice == 2:
-                print("returning to main menu")
-                break
+        elif choice == 2:
+            print("returning to main menu")
+            break
 
-            else:
-                print("Unexpected input. try again,")
-
-    except ValueError:
-        print("Invalid input, please enter number")
+        else:
+            print("Unexpected input. try again,")
 
 
 #main menu for jokes          
 def joke_menu(): 
     print("Welcome to the joke menu. Here are your options\n")
+
+    choice = 0 #choice initialization before loop
     try:
-        while True:
+
+        
+
+        while choice != 5:
             print("1. Add a joke")
             print("2. Tell me a joke")
             print("3. Show all jokes")
@@ -383,15 +404,51 @@ def joke_menu():
 
 
 
+#calculates the score of given word based on values of letters in english alphabet using a generator expression within the sum function calculating the scores of each letter
+def str_manipulation(word):
+    score  = sum((ord(letter) - ord('a') + 1) for letter in word.lower())
+    return score
+
+def scrabble(): 
+    #Letter scores based on letters of words entered
+    letter_scores = {'a': 1, 'b': 3, 'c': 3, 'd': 2, 'e': 1, 'f': 3, 'g': 6, 'h': 7, 'i': 8 }
+    #player scores is a list keeping track of the scores of two players
+    player_scores = [0, 0]
+    #integer of 0 or 1 indicating which player's turn it is. It starts with player 1 with the index of 0.
+    current_player = 0
+    #infinite loop until the player exits. Each iteration prompts the current player to enter a word.
+    while True: 
+        word = input(f"Player {current_player + 1}, enter a word (or 'exit' to end the game): ")
+
+        #if plater enters exit(not case sensitive), the game ends and the final results are printed and the loop is exited
+        if word.lower() == "exit":
+            print("Game over. Final scores:")
+            print(f"Player 1: {player_scores[0]} points")
+            print(f"Player 2: {player_scores[1]} points")
+            break
+
+            #str_manipulation takes word as parameter and is assigned to score to calculate the score for the entered word and then added to the total score of the current player.
+        score = str_manipulation(word)
+        player_scores[current_player] += score
+        print(f"Score for {word}: {score} points")
+        print(f"Total score for Player {current_player + 1}: {player_scores[current_player]} points\n")
+        #switches the current player for the next iteration of the loop.
+        current_player = 1 - current_player
+
+
+
 #main program where code starts
 def main():
-    while True:
+    choice = 0
+
+    while choice != 6:
         print("Hello and welcome to our expanded menu. Here is the list of things to do.")
         print("1: Jokes")
         print("2: What your favorite thing says about you")
         print("3: Choose your own adventure story.")
         print("4: trivia")
-        print("5: exit")
+        print("5: Scrabble")
+        print("6: exit")
         
        
         try: 
@@ -408,10 +465,12 @@ def main():
 
             elif choice == 4: 
                 trivia_menu()
-
+            
             elif choice == 5: 
+                scrabble()
+
+            elif choice == 6: 
                 print("Exiting the program bye!")
-                break
 
             else: 
                 print(f"You entered {choice} You can't just enter any number you want, please enter a number between 1 and 4")

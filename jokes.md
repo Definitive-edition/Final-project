@@ -5,3 +5,4 @@
 4: What do you call 5000 dead lawyers at the bottom of the ocean? A good start
 4: Why won't sharks attack lawyers? Professional courtesy
 
+1: What is the currency in Outer Space? Starbucks
