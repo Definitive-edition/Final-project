@@ -8,4 +8,5 @@
 2: What looks like a dog, eats dog food, lives in a doghouse and is very dnagerous? A dog with a machete
 2: Why do you need a license for a dog and not for a cat?
 3: What were the dinosaur's last words? Ayo these don't look like shooting stars.
-5: 
+1: Why did the sun go to school? To get a little brighter.
+1: What do you call a tick on the moon? A lunatick

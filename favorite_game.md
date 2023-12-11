@@ -5,3 +5,4 @@ celeste: Wow, i didn't know you were into indie games, that's an amazing startin
 paper mario ttyd: That's one of the best rpg games you can get your hands on, it's officially being remade for switch. 
 mario rabbids sparks of hope: It is the second game in the Mario + Rabbids series, and the sequel to Mario + Rabbids Kingdom Battle. Like its predecessor, the game is a crossover featuring characters from the Super Mario franchise and Ubisoft's Rabbids series, and sees the return of characters from the previous game in addition to introducing new ones such as Rabbid versions of Rosalina and Lumas named Sparks.
 sparks of hope: Not the best sequel. Kingdom battle was way better
+Mario cart: Fun gocart style car race game.
