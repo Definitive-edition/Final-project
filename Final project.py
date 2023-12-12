@@ -296,9 +296,9 @@ def adventure_story():
     try: 
         print(f"{Fore.YELLOW}You have beaten Ashera and mysteriously went to sleep. You now have woken up in the skies of your own home world, you realize that you live on the clouds!")
         print(f"{Fore.YELLOW}You find a mysterious cloud shaped key that leads into a door that you don't know where it goes and a mysterious drink. Which do you choose?")
-        
+        adventure = None
 
-        while True:
+        while adventure not in ["myseterious drink", "cloud key"]:
             adventure = input(f"{Back.WHITE},{Fore.GREEN}mysterious drink or cloud key: \n").lower()
 
             if adventure == "mysterious drink": 
@@ -369,14 +369,21 @@ def trivia():
     questions_and_answers = load_questions(trivia_file)
 
     for question, correct_answer in questions_and_answers.items(): 
-        while True:
+        attempts = 3
+        while attempts > 0:    
+        
             answer = input(question + '\n')
 
             if answer.lower() == correct_answer.lower(): 
                 print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}That's correct\n")
                 break
             else: 
-                print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Incorrect, try again")
+                attempts -= 1
+                print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Incorrect, try again {attempts} {'attempts' if attempts > 1 else 'attempt'} remaining")
+
+
+                if attempts == 0:
+                    print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX} You've run out of attempts, the correct answer is {correct_answer}\n")
 
 
     print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Congratulations! You completed trivia.")
@@ -446,7 +453,7 @@ def str_manipulation(word):
 
 def scrabble(): 
     #Letter scores based on letters of words entered
-    letter_scores = {'a': 1, 'b': 3, 'c': 3, 'd': 2, 'e': 1, 'f': 3, 'g': 6, 'h': 7, 'i': 8 }
+    letter_scores = {'a': 1, 'b': 3, 'c': 3, 'd': 2, 'e': 1, 'f': 3, 'g': 6, 'h': 7, 'i': 8, 'j':0 }
     #player scores is a list keeping track of the scores of two players
     player_scores = [0, 0]
     #integer of 0 or 1 indicating which player's turn it is. It starts with player 1 with the index of 0.
@@ -477,7 +484,7 @@ def main():
     choice = 0
     colorama.init(autoreset = True)
 
-    while choice != 6:
+    while choice < 1 or choice > 6:
         print(f"{Fore.RESET}Hello and welcome to our expanded menu. Here is the list of things to do.")
         print("1: Jokes")
         print("2: What your favorite thing says about you")
