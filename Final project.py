@@ -9,6 +9,7 @@ import colorama
 from colorama import Fore, Back, Style
 import requests
 from functools import partial
+import json
 
 #file variables
 joke_file_path = "jokes.md"
@@ -17,6 +18,34 @@ game_file_path = "favorite_game.md"
 movie_file_path = "favorite_movie.md"
 random_jokes = "random_jokes.md"
 trivia_file = "trivia_questions.md"
+
+#this function makes an api call to find out about a given movie
+#Api provider is: https://search.imdbot.workers.dev/
+#movie name is to be passed as parameter for example: "usage":"pass a 'q' as a query string parameter","info":"
+#make sure requests package is installed put in 'pip install requests on command prompt'
+#import requests 
+def query_online_movie_database(movie_name): 
+    movieDbApiUrl = "https://search.imdbot.workers.dev/"
+    movie_params = {}
+
+    movie_params['q'] = movie_name 
+
+    movie_response = requests.get(movieDbApiUrl, params=movie_params)
+    print(f"This is the API response: {movie_response}")
+    
+    movieResponseText = ""
+    if movie_response.status_code == 200:
+        #print(f"response object using json method: {movie_response.json()}")
+        #movieResponseText = json.dumps(movie_response.json(), sort_keys=True, indent=4)
+        moviesJsonObj = movie_response.json()
+        moviesDescription = moviesJsonObj['Description']
+        movieResponseText = json.dumps(moviesDescription, sort_keys=True, indent=4)
+        print(movieResponseText)
+        
+    movie_response.close()
+    return movieResponseText
+    
+
 
 #this function tells a joke for a selected category. Takes file path of jokes file, reads the file and based on the selected joke category
 #it displays a random joke in the category.
@@ -242,6 +271,8 @@ def favorite_game_analysis():
     except ValueError: 
         print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Invalid value entered")
 
+
+
 #function to display about a movie
 def favorite_movie_analysis(movie_file_path): 
         # consider making api call for games not in file.
@@ -265,22 +296,22 @@ def favorite_movie_analysis(movie_file_path):
             print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Genre: {movie_info[movie]}")
 
 
+        #movie not found in local file. Make an api call to online movie database.
+        #if not found online, then ask to enter your own description about the movie and add to local file.
         else: 
-            print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Sorry, information about '{movie}' not available")
+            #making an api call
+            print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX} Checking for the movie in online movie database.")
+            movie_info = query_online_movie_database(movie)
+            
+            #movie not found online and adding to local file
+            if len(movie_info) < 1: 
 
-            description = input(f"{Back.WHITE},{Fore.GREEN}Please provide a description for '{movie}: '")
-
-
-
-            movie_info[movie] = description
-
-
-            with open(movie_file_path, 'a') as file: 
-                file.write(f"\n{movie}: {description}")
-                print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Information about '{movie}' has been added to the file")
-
-
-
+                print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Sorry, information about '{movie}' not available")
+                description = input(f"{Back.WHITE},{Fore.GREEN}Please provide a description for '{movie}: '")
+                movie_info[movie] = description
+                with open(movie_file_path, 'a') as file: 
+                    file.write(f"\n{movie}: {description}")
+                    print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Information about '{movie}' has been added to the file")
     except FileNotFoundError:
         print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}File not found at {movie_file_path}")
 
@@ -484,7 +515,7 @@ def main():
     choice = 0
     colorama.init(autoreset = True)
 
-    while choice < 1 or choice > 6:
+    while choice != 6:
         print(f"{Fore.RESET}Hello and welcome to our expanded menu. Here is the list of things to do.")
         print("1: Jokes")
         print("2: What your favorite thing says about you")
