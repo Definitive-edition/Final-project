@@ -9,7 +9,6 @@ import colorama
 from colorama import Fore, Back, Style
 import requests
 from functools import partial
-import json
 
 #file variables
 joke_file_path = "jokes.md"
@@ -24,62 +23,83 @@ trivia_file = "trivia_questions.md"
 #movie name is to be passed as parameter for example: "usage":"pass a 'q' as a query string parameter","info":"
 #make sure requests package is installed put in 'pip install requests on command prompt'
 #import requests 
+
+#function definition which takes movie_name as parameter
 def query_online_movie_database(movie_name): 
+    #variable initialization with url
     movieDbApiUrl = "https://search.imdbot.workers.dev/"
+    #empty dictionary called movie_params to store parameters for API request
     movie_params = {}
-
+    #key value pair added where key is 'q and value is movie name passed to the function
     movie_params['q'] = movie_name 
-
+    #sends a get request to the movie database API using requests library with params being used to include the query parameters in the request
     movie_response = requests.get(movieDbApiUrl, params=movie_params)
+    #prints information about API response including response object
     print(f"This is the API response: {movie_response}")
-    
-    #movieResponseText = ""
+
+    #checks if the HTTP code is 200 which means the request was successful
     if movie_response.status_code == 200:
-        #movieResponseText = json.dumps(movie_response.json()['description'], sort_keys=True, indent=4)
-        #print(movieResponseText)
+        #extracts the description field from the JSON content of API response and is assigned to movieRespDescription
         movieRespDescription = movie_response.json()['description']
+        #prints the count of movie search results in string format
         print ("Movie search results count: " + str(len(movieRespDescription)))
+        #start of loop over each movie result in movieRespDescription
         for mResult in movieRespDescription:
+            #extraction of the movie title, year and actors from each result in loop
             title = mResult['#TITLE']
             year = mResult['#YEAR']
             actors = mResult['#ACTORS']
+            #movie details for each result in string format
             print ('Movie: ', str(title),  'Year: ', str(year),  'Actors:', str(actors))
+    #closed HTTP response connection and returns movieRespDescription which has info about the search results
     movie_response.close()
     return movieRespDescription
     
 
 
 #this function tells a joke for a selected category. Takes file path of jokes file, reads the file and based on the selected joke category
-#it displays a random joke in the category.
+#it displays a random joke based on category input
+#function defintion with pJoke_file_path as parameter
 def tell_joke(pJoke_file_path):
+    #initilize empty list to store jokes
     joke_list = []
+    #all these lines print a menu using color codes from the colorama library. user prompted to select category or exit.
     print("\n") 
     print(f"{Fore.RED}1. NASA related joke")
     print(f"{Fore.RED}2. Dog jokes")
     print(f"{Fore.RED}3. Dinsosaur jokes ")
     print(f"{Fore.RED}4. Lawyer jokes")
     print(f"{Fore.RED}5. Miscellaneous jokes")
-    print(f"{Fore.RED}6. exit joke menu")
-
+    
     try:
-        user_input = input(f"{Back.WHITE},{Fore.GREEN}Select a category for the joke (1-6) or press exit to go back to main menu: ")
-        regPattern = "^" + user_input
-
+        #user prompted to input category number or type exit to go back to main menu
+        user_input = input(f"{Back.WHITE},{Fore.GREEN}Select a category for the joke (1-5): ")
+        #creates a regular expression pattern concatenating the user's input with the '^' character which indicates the start of a line.
+        regPattern = f"^{user_input}:"
+        #opens the joke file in read mode using with to properly close after reading
         with open(pJoke_file_path, 'r') as file:
+            #these next few lines loop through each line in the file applying the regex pattern to find lines that match the input of the user. the line is added to joke_list if match found.
             joke_pattern = re.compile(regPattern)
             for line in file: 
-                #print(f"current line in joke file {line}")
                 match = joke_pattern.search(line)
                 if match: 
                     joke_list.append(match.string) 
 
-       # print(f"Size of joke_list: {len(joke_list)}")
-        randomJokeIndex = random.randint(0, len(joke_list))
-        selected_joke = joke_list[randomJokeIndex]
-        print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Here is your joke: {joke_list[randomJokeIndex]}")
-
-        return selected_joke
-    
+                #if joke list is not empty, this statement will run
+            if joke_list:
+                    #random index generated within valid range of indices for the list. Joke selected from list using random index and assigned to selected_joke
+                    #which is then printed using color codes. Note that the -1 is to make sure that the generated random index is within the bounds of the list
+                    # the 0 is the starting point for the range for random index generation
+                randomJokeIndex = random.randint(0, len(joke_list) - 1)
+                selected_joke = joke_list[randomJokeIndex]
+                print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Here is your joke: {joke_list[randomJokeIndex]}")
+                    #returns the selcted joke value
+                return selected_joke
+                #else block executed if the list is empty which means no jokes were found for selected category and returns none
+            else: 
+                print("No Jokes found for selected category")
+                return None
+    #value error catch which occurs when converting the user input to the program's expected data type
     except ValueError: 
         print("Invalid value")
        
@@ -93,6 +113,7 @@ def add_joke():
     print(f"{Fore.RED}4. Lawyer jokes")
     print(f"{Fore.RED}5. Miscellaneous jokes")
     print(f"{Fore.RED}6. exit joke menu")
+    #category input for the joke with input being taken as string
     try:
         user_input = input(f"{Back.WHITE},{Fore.GREEN}Select a category for the joke (1-6) or press exit to go back to main menu: ")
         
@@ -101,14 +122,19 @@ def add_joke():
             print("Exiting menu")
             return
         
-        #\b matches any word boundary such as spaces, dashes, commas, semicolons and more ensures that the 1-5 isn't part of a larger number.
-        # [1-6] is a character class matching any single digit from 1 to 6. the digit at this position must be one of these digits.
+        
+        #regular expression to remove color codes
+        # \x1b is the an escape code to remove color coding
+        # \[ is a literal character
+        # [0-9;*] this part of the pattern is a character class 
+        #m is a literal character to mark the end of a color code.
         user_input_without_color = re.sub(r'\x1b\[[0-9;]*m', '', user_input)
-
+        #\b matches any word boundary such as spaces, dashes, commas, semicolons and more ensures that the 1-5 isn't part of a larger number.
+        #[1-6] is a character class matching any single digit from 1 to 6. the digit at this position must be one of these digits.
         if not re.match(r"\b[1-6]\b",user_input_without_color):
             print("Invalid input. Enter a valid value between 1 and 6")
             return
-
+        #input converted to int for further processing
         category = int(user_input_without_color)
 
         
@@ -117,13 +143,14 @@ def add_joke():
             print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Unexpected input, enter a value between 1 and 6.")
             return #exiting function if invalid input is detected
         
-       
+        #new joke entry for specified category
         new_joke = input("Enter a new joke: ")
 
-
+        #opens the file in append mode and appends the created joke with it's category to the file and prints the sucess message.
         with open(joke_file_path, "a") as file: 
             file.write(f"{category}: {new_joke}\n")
             print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX} Joke added.")
+
     except ValueError: 
         print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Invalid input. Enter a valid value for category")
         
@@ -148,9 +175,8 @@ def show_joke_file(joke_file_path):
 
 #this is the main program for engaging user on favorite things. User can choose favorite character, movie and games
 def favorite_thing():
+    #list created containging three strings with each string representing a different category
     topics = ["Favorite character","Favorite Movie", "Favorite Game"]
-       
-    
 
     try:
         print('\n') 
@@ -158,9 +184,10 @@ def favorite_thing():
         print(f"{Fore.GREEN}2. Favorite Movie")
         print(f"{Fore.GREEN}3. Favorite Game")
         print(f"{Fore.GREEN}4. exit to main program")
+        #takes user input for topic and converts it into integer
         topic_choice = int(input("Choose a topic between 0 and 3.\n "))
        
-        #alternative to if-else using dictionary instead
+        #alternative to if-else using dictionary. number 2 uses the functools module and the partial library to partially apply the favorite_movie_analysis with movie_file_path as a parameter
         favorite_thing_dict = {
 
             1: favorite_character_analysis,
@@ -175,6 +202,7 @@ def favorite_thing():
         if topic_choice in favorite_thing_dict:
             #favorite_thing_dict[topic_choice]() accesses a function from the favorite_thing_dict using topic_choice as the key before calling the function.
             print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}You chose {topics[topic_choice - 1]}")#topic_choice 1 retrives the corresponding topic from the list
+            #calls the function with user's choice from dictionary
             favorite_thing_dict[topic_choice]()
         else:
             print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}You shall not pass.")
@@ -187,8 +215,11 @@ def favorite_thing():
 #this function will take user input for a character and displays brief description of the character
 #Alternatively, user can add a character to the file.
 def favorite_character_analysis(): 
+        #empty dictionary created to store information about favorite characters
         character_info = {}
+        #opens the file in read mode
         with open(character_file_path, 'r') as file:
+                #iterates over each line in file
                 for line in file: 
                     try:
                         key, value = map(str.strip, line.split(':', 1))
@@ -199,19 +230,22 @@ def favorite_character_analysis():
             # creates dictionary from key-value pairs. whitespace removed from the lines and splits the line
             # when colon first occurs. the 1 is to ensure that at least one split is performed which makes a list of two elements. 
             # the key and the value(before and after colon)
-
+        #character and character_choice variables intiialized
         character = None
         character_choice = False
         print ("Welcome to favorite character analysis.")
+        #while loop start until character_choice becomes True
         while character_choice is not True:
+                #user input taken for favorite character or type exit
                 try:
                     character = input(f"{Back.WHITE},{Fore.GREEN}Enter your favorite character or enter exit:\n ")
 
+                    #if user enters exit, character_choice is set to True
                     if character == "exit":
                         print("exiting...")
                         character_choice = True
                         return
-                    #check if character entered is in character database
+                    #check if character entered is in character_info
                     if character in character_info: 
                         print(Back.BLACK + Fore.LIGHTCYAN_EX + character_info[character.lower()])
 
@@ -219,12 +253,14 @@ def favorite_character_analysis():
 
                     else: 
                         print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX} character not in file.")
-                
-                        addition_status = input(f"{Back.WHITE},{Fore.GREEN} Do you want to add character for:{character}? press y to continue: ")
 
+                        #ask user if they want to add character to file
+                        addition_status = input(f"{Back.WHITE},{Fore.GREEN} Do you want to add character for:{character}? press y to continue: ")
+                        #if user presses y , it will take input for description
                         if addition_status.lower() == "y": 
                             character_description = input(f"{Back.WHITE},{Fore.GREEN} Enter description: ")
 
+                            # character_info dictionary updated with the new character and description and appends this information to file.
                             character_info[character] = f"{character}: {character_description}"
 
                             with open(character_file_path, "a") as file:
@@ -237,50 +273,47 @@ def favorite_character_analysis():
       
 
 #function to display about a game or add a game description
-#consider making an api call to online games database
-def favorite_game_analysis(): 
-    try: 
+def favorite_game_analysis():  
+        #takes user input for favorite game
         game = input(f"{Back.WHITE},{Fore.GREEN}Welcome to favorite game analysis. Enter your favorite game:\n ")
 
+        #opens file in read mode and uses dictionary comprehension to make game_info dictionary from lines of file. Every line stripped of leading and trailing whitespaces,
+        #split at first colon ':' creating key-value pairs.
         with open(game_file_path, 'r') as file:
             game_info = dict(line.strip().split(':', 1) for line in file)
 
 
-
+        #checks if entered game is in the game_info dictionary. If found, info about game printed
         if game.lower() in game_info: 
             print(game_info[game.lower()])
 
-
+        #if game isn't found, error message printed.
         else:
             print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Game not in file")
 
-        addition_status = input(f"{Back.WHITE},{Fore.GREEN}Do you want to add game description for: {game}? press y to continue: ")
+        #asks user to add game description for entered game. press y to proceed
+            addition_status = input(f"{Back.WHITE},{Fore.GREEN}Do you want to add game description for: {game}? press y to continue: ")
+        #add description and rating
+            if addition_status.lower() == "y": 
+                game_description = input(f"{Back.WHITE},{Fore.GREEN}Enter description: ")
+                game_rating = input(f"{Back.WHITE},{Fore.GREEN} Enter rating out of 10: ")
+                #game_info dict with new game and description and appends info to file.
+                game_info[game] = f"{game}: {game_description}, Rating: {game_rating}"
 
-        if addition_status.lower() == "y": 
-            game_description = input(f"{Back.WHITE},{Fore.GREEN}Enter description: ")
-
-            game_info[game] = f"{game}: {game_description}"
-
-            with open(game_file_path, "a") as file:
-                file.write('\n' + game + ': ' + game_description )
-                print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Game successfully added.")
-
-        
-
-        
-
-
-    except ValueError: 
-        print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Invalid value entered")
+                with open(game_file_path, "a") as file:
+                    file.write('\n' + game + ': ' + game_description + ', Rating: ' + game_rating)
+                    print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Game successfully added.")
 
 
 
 #function to display about a movie
 def favorite_movie_analysis(movie_file_path): 
         # consider making api call for games not in file.
+    #takes user input for favorite movie inside of try block   
     try: 
         movie = input(f"{Back.WHITE},{Fore.GREEN}Welcome to favorite movie/anime/show analysis. Enter your favorite movie:\n")
 
+        #opens file in read mode and reads its contents line by line. For each line, it spits the line at first colon and creates key-value pair in movie_info dictionary.
         with open(movie_file_path, 'r') as file:
             movie_info = {}
 
@@ -292,7 +325,7 @@ def favorite_movie_analysis(movie_file_path):
 
                 movie_info[key] = value 
 
-
+        #If entered movie is found in the local file, info about movie and genre is printed
         if movie in movie_info: 
             print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Information about your favorite movie '{movie}':")
             print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Genre: {movie_info[movie]}")
@@ -305,24 +338,26 @@ def favorite_movie_analysis(movie_file_path):
             print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX} Checking for the movie in online movie database.")
             movie_info = query_online_movie_database(movie)
             
-            #movie not found online and adding to local file
+            #if online database doesn't have information about movie and prompts user to provide description and adds movie info to local file
             if len(movie_info) < 1: 
 
                 print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Sorry, information about '{movie}' not available")
                 description = input(f"{Back.WHITE},{Fore.GREEN}Please provide a description for '{movie}: '")
+
                 with open(movie_file_path, 'a') as file: 
                     file.write(f"\n{movie}: {description}")
                     print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Information about '{movie}' has been added to the file")
+
+    #FileNotFoundError if file isn't found and prints error message
     except FileNotFoundError:
         print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}File not found at {movie_file_path}")
-
+    #catches other exceptions as a generic exception class and prints an error message with the exception details.
     except Exception as e: 
         print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}An error occured: {e}")
 
 
 
 #function for authoring an adventure story
-#consider incorporating an AI module for script generation
 def adventure_story(): 
 
     try: 
@@ -330,7 +365,7 @@ def adventure_story():
         print(f"{Fore.YELLOW}You find a mysterious cloud shaped key that leads into a door that you don't know where it goes and a mysterious drink. Which do you choose?")
         adventure = None
 
-        while adventure not in ["myseterious drink", "cloud key"]:
+        while adventure not in ["mysterious drink", "cloud key"]:
             adventure = input(f"{Back.WHITE},{Fore.GREEN}mysterious drink or cloud key: \n").lower()
 
             if adventure == "mysterious drink": 
@@ -397,23 +432,27 @@ def load_questions(trivia_file):
 
 def trivia(): 
     print(f"{Fore.BLUE}Welcome to trivia! there will be 5 questions.")
-    # consider making api call for trivia database
+    #calls a function called load_questions with trivia_file as parameters.
     questions_and_answers = load_questions(trivia_file)
-
+    #iteration over questions and answers loaded from trivia_file with each iteration represents a single trivia question and it's correct answer.
     for question, correct_answer in questions_and_answers.items(): 
+        #sets number of attempts to 3 and enters a while loop that continues until the user either answer's correctly or runs out of attempts taking user input for answer to the current question
         attempts = 3
         while attempts > 0:    
         
             answer = input(question + '\n')
-
+            #checks if user's answer matches correct answer and prints a message and moves on to next question
             if answer.lower() == correct_answer.lower(): 
                 print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}That's correct\n")
                 break
+            #if answer is incorrect, decrementation of the attempt counter, prints error message and continues the loop which inlcudes the number of remaining attempts
             else: 
                 attempts -= 1
+                # attempts > 1 is evaluated and if true, returns the string 'attempts' which means there's more than 1 attempt remaining. if false, it returns the 'attempt' string
+                #meaning there's only 1 attempt left.
                 print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Incorrect, try again {attempts} {'attempts' if attempts > 1 else 'attempt'} remaining")
 
-
+                #if attempts have run out and reach 0, prints message and shows correct answer.
                 if attempts == 0:
                     print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX} You've run out of attempts, the correct answer is {correct_answer}\n")
 
@@ -455,7 +494,7 @@ def joke_menu():
             print(f"{Fore.RED}2. Tell me a joke")
             print(f"{Fore.RED}3. Show all jokes")
             print(f"{Fore.RED}4. Return to main program\n")
-            choice = int(input("Choose a number between 1 and 5: \n"))
+            choice = int(input("Choose a number between 1 and 4: \n"))
 
 
             if choice == 1: 
@@ -480,6 +519,12 @@ def joke_menu():
 
 #calculates the score of given word based on values of letters in english alphabet using a generator expression within the sum function calculating the scores of each letter
 def str_manipulation(word):
+    # ord(letter) - ord('a') + 1 calculates a score for each letter in lowercase version of word
+    #ord letter returns unicode point of the character letter
+    # ord() function gets numeric value associated with character.
+    #ord(a) provides unicode code point of the lower case letter a
+    #ord letter - ord('a') is 1 representing that the b is the second letter in the alphabet.
+    #ord(letter) - ord('a') + 1 adds 1 to the result making sure that the letter 'a' has a score of 1 
     score  = sum((ord(letter) - ord('a') + 1) for letter in word.lower())
     return score
 
