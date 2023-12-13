@@ -15,7 +15,6 @@ joke_file_path = "jokes.md"
 character_file_path = "favorite_character.md"
 game_file_path = "favorite_game.md"
 movie_file_path = "favorite_movie.md"
-random_jokes = "random_jokes.md"
 trivia_file = "trivia_questions.md"
 
 #this function makes an api call to find out about a given movie
