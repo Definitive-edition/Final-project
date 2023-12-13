@@ -33,17 +33,19 @@ def query_online_movie_database(movie_name):
     movie_response = requests.get(movieDbApiUrl, params=movie_params)
     print(f"This is the API response: {movie_response}")
     
-    movieResponseText = ""
+    #movieResponseText = ""
     if movie_response.status_code == 200:
-        #print(f"response object using json method: {movie_response.json()}")
-        #movieResponseText = json.dumps(movie_response.json(), sort_keys=True, indent=4)
-        moviesJsonObj = movie_response.json()
-        moviesDescription = moviesJsonObj['Description']
-        movieResponseText = json.dumps(moviesDescription, sort_keys=True, indent=4)
-        print(movieResponseText)
-        
+        #movieResponseText = json.dumps(movie_response.json()['description'], sort_keys=True, indent=4)
+        #print(movieResponseText)
+        movieRespDescription = movie_response.json()['description']
+        print ("Movie search results count: " + str(len(movieRespDescription)))
+        for mResult in movieRespDescription:
+            title = mResult['#TITLE']
+            year = mResult['#YEAR']
+            actors = mResult['#ACTORS']
+            print ('Movie: ', str(title),  'Year: ', str(year),  'Actors:', str(actors))
     movie_response.close()
-    return movieResponseText
+    return movieRespDescription
     
 
 
@@ -308,7 +310,6 @@ def favorite_movie_analysis(movie_file_path):
 
                 print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Sorry, information about '{movie}' not available")
                 description = input(f"{Back.WHITE},{Fore.GREEN}Please provide a description for '{movie}: '")
-                movie_info[movie] = description
                 with open(movie_file_path, 'a') as file: 
                     file.write(f"\n{movie}: {description}")
                     print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Information about '{movie}' has been added to the file")
@@ -316,7 +317,7 @@ def favorite_movie_analysis(movie_file_path):
         print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}File not found at {movie_file_path}")
 
     except Exception as e: 
-        print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}An error occured {e}")
+        print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}An error occured: {e}")
 
 
 
