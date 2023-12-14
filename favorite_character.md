@@ -9,3 +9,5 @@ luigi: mario's older brother, also voiced by charles martinet who is not the voi
 cursa: Cursa is the main antagonist in the game Mario + Rabbids Sparks of Hope. It is an entity that wants to consume Sparks and spread matter known as Darkmess across the galaxy, which it uses to drain the Sparks of their power.
 iron man: Entreprenuer and inventor.
 Frodo: Ring bearer and one of main character in Lord of the Rings.
+Ashnard: bjhkjfhsdkjfhdskfhks
+peach: The princess of mario who always gets kidnapped and seems to win the villain's heart

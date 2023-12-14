@@ -69,14 +69,12 @@ def tell_joke(pJoke_file_path):
     print(f"{Fore.RED}3. Dinsosaur jokes ")
     print(f"{Fore.RED}4. Lawyer jokes")
     print(f"{Fore.RED}5. Miscellaneous jokes")
-    
-    try:
         #user prompted to input category number or type exit to go back to main menu
-        user_input = input(f"{Back.WHITE},{Fore.GREEN}Select a category for the joke (1-5): ")
+    user_input = input(f"{Back.WHITE},{Fore.GREEN}Select a category for the joke (1-5): ")
         #creates a regular expression pattern concatenating the user's input with the '^' character which indicates the start of a line.
-        regPattern = f"^{user_input}:"
+    regPattern = f"^{user_input}:"
         #opens the joke file in read mode using with to properly close after reading
-        with open(pJoke_file_path, 'r') as file:
+    with open(pJoke_file_path, 'r') as file:
             #these next few lines loop through each line in the file applying the regex pattern to find lines that match the input of the user. the line is added to joke_list if match found.
             joke_pattern = re.compile(regPattern)
             for line in file: 
@@ -98,9 +96,7 @@ def tell_joke(pJoke_file_path):
             else: 
                 print("No Jokes found for selected category")
                 return None
-    #value error catch which occurs when converting the user input to the program's expected data type
-    except ValueError: 
-        print("Invalid value")
+  
        
 
 #function that displays submenu for jokes. User can add joke for a selected category. The jokes entered will be saved in jokes.md
@@ -113,13 +109,13 @@ def add_joke():
     print(f"{Fore.RED}5. Miscellaneous jokes")
     print(f"{Fore.RED}6. exit joke menu")
     #category input for the joke with input being taken as string
-    try:
-        user_input = input(f"{Back.WHITE},{Fore.GREEN}Select a category for the joke (1-6) or press exit to go back to main menu: ")
+
+    user_input = input(f"{Back.WHITE},{Fore.GREEN}Select a category for the joke (1-6) or press exit to go back to main menu: ")
         
 
-        if user_input.lower() == '6':
-            print("Exiting menu")
-            return
+    if user_input.lower() == '6':
+        print("Exiting menu")
+        return
         
         
         #regular expression to remove color codes
@@ -127,31 +123,29 @@ def add_joke():
         # \[ is a literal character
         # [0-9;*] this part of the pattern is a character class 
         #m is a literal character to mark the end of a color code.
-        user_input_without_color = re.sub(r'\x1b\[[0-9;]*m', '', user_input)
-        #\b matches any word boundary such as spaces, dashes, commas, semicolons and more ensures that the 1-5 isn't part of a larger number.
+    user_input_without_color = re.sub(r'\x1b\[[0-9;]*m', '', user_input)
+        #\b matches any word boundary such as spaces, dashes, commas, semicolons and more ensures that the 1-6 isn't part of a larger number.
         #[1-6] is a character class matching any single digit from 1 to 6. the digit at this position must be one of these digits.
-        if not re.match(r"\b[1-6]\b",user_input_without_color):
-            print("Invalid input. Enter a valid value between 1 and 6")
-            return
+    if not re.match(r"\b[1-6]\b",user_input_without_color):
+        print("Invalid input. Enter a valid value between 1 and 6")
+        return
         #input converted to int for further processing
-        category = int(user_input_without_color)
+    category = int(user_input_without_color)
 
         
 
-        if category not in range (1, 7): 
-            print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Unexpected input, enter a value between 1 and 6.")
-            return #exiting function if invalid input is detected
+    if category not in range (1, 7): 
+        print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Unexpected input, enter a value between 1 and 6.")
+        return #exiting function if invalid input is detected
         
         #new joke entry for specified category
-        new_joke = input("Enter a new joke: ")
+    new_joke = input("Enter a new joke: ")
 
         #opens the file in append mode and appends the created joke with it's category to the file and prints the sucess message.
-        with open(joke_file_path, "a") as file: 
-            file.write(f"{category}: {new_joke}\n")
-            print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX} Joke added.")
+    with open(joke_file_path, "a") as file: 
+        file.write(f"{category}: {new_joke}\n")
+        print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX} Joke added.")
 
-    except ValueError: 
-        print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Invalid input. Enter a valid value for category")
         
 
 
@@ -174,7 +168,7 @@ def show_joke_file(joke_file_path):
 
 #this is the main program for engaging user on favorite things. User can choose favorite character, movie and games
 def favorite_thing():
-    #list created containging three strings with each string representing a different category
+    #list created containing three strings with each string representing a different category
     topics = ["Favorite character","Favorite Movie", "Favorite Game"]
 
     try:
@@ -184,7 +178,7 @@ def favorite_thing():
         print(f"{Fore.GREEN}3. Favorite Game")
         print(f"{Fore.GREEN}4. exit to main program")
         #takes user input for topic and converts it into integer
-        topic_choice = int(input("Choose a topic between 0 and 3.\n "))
+        topic_choice = int(input("Choose a topic between 1 and 4.\n "))
        
         #alternative to if-else using dictionary. number 2 uses the functools module and the partial library to partially apply the favorite_movie_analysis with movie_file_path as a parameter
         favorite_thing_dict = {
@@ -236,7 +230,6 @@ def favorite_character_analysis():
         #while loop start until character_choice becomes True
         while character_choice is not True:
                 #user input taken for favorite character or type exit
-                try:
                     character = input(f"{Back.WHITE},{Fore.GREEN}Enter your favorite character or enter exit:\n ")
 
                     #if user enters exit, character_choice is set to True
@@ -266,8 +259,7 @@ def favorite_character_analysis():
                                 file.write('\n' + character + ': ' + character_description )
                                 print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX} Character successfully added.")
 
-                except ValueError:
-                 print(f"{Fore.GREEN}Invalid choice")
+               
 
       
 
@@ -312,7 +304,7 @@ def favorite_movie_analysis(movie_file_path):
     try: 
         movie = input(f"{Back.WHITE},{Fore.GREEN}Welcome to favorite movie/anime/show analysis. Enter your favorite movie:\n")
 
-        #opens file in read mode and reads its contents line by line. For each line, it spits the line at first colon and creates key-value pair in movie_info dictionary.
+        #opens file in read mode and reads its contents line by line. For each line, it splits the line at first colon and creates key-value pair in movie_info dictionary.
         with open(movie_file_path, 'r') as file:
             movie_info = {}
 
@@ -327,7 +319,7 @@ def favorite_movie_analysis(movie_file_path):
         #If entered movie is found in the local file, info about movie and genre is printed
         if movie in movie_info: 
             print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Information about your favorite movie '{movie}':")
-            print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Genre: {movie_info[movie]}")
+            print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}description: {movie_info[movie]}")
 
 
         #movie not found in local file. Make an api call to online movie database.
@@ -357,9 +349,8 @@ def favorite_movie_analysis(movie_file_path):
 
 
 #function for authoring an adventure story
-def adventure_story(): 
-
-    try: 
+def adventure_story():  
+        print("\n")
         print(f"{Fore.YELLOW}You have beaten Ashera and mysteriously went to sleep. You now have woken up in the skies of your own home world, you realize that you live on the clouds!")
         print(f"{Fore.YELLOW}You find a mysterious cloud shaped key that leads into a door that you don't know where it goes and a mysterious drink. Which do you choose?")
         adventure = None
@@ -380,11 +371,6 @@ def adventure_story():
                 print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}The consequences of your choice weighs far heavily than you envisioned as you find yhourself alone in the now desolate cloud world ")
 
                 break
-        
-
-
-    except ValueError: 
-        print("Invalid value please try again.")
 
 #main menu for adventure story
 def adventure_story_menu():
@@ -393,6 +379,7 @@ def adventure_story_menu():
    
     try:
         while True:
+            print("\n")
             print(f"{Fore.YELLOW}1. Start adventure")
             print(f"{Fore.YELLOW}2. Return to main program.")
             choice = int(input(f"{Back.WHITE},{Fore.GREEN}choose between 1 and 2. "))
@@ -545,7 +532,7 @@ def scrabble():
             print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Player 2: {player_scores[1]} points")
             break
 
-            #str_manipulation takes word as parameter and is assigned to score to calculate the score for the entered word and then added to the total score of the current player.
+            #str_manipulation takes word as parameter and is assigned to  calculate the score for the entered word and then added to the total score of the current player.
         score = str_manipulation(word)
         player_scores[current_player] += score
         print(f"{Back.BLACK}, {Fore.LIGHTCYAN_EX}Score for {word}: {score} points")
@@ -563,7 +550,7 @@ def main():
     while choice != 6:
         print(f"{Fore.RESET}Hello and welcome to our expanded menu. Here is the list of things to do.")
         print("1: Jokes")
-        print("2: What your favorite thing says about you")
+        print("2: favorite thing")
         print("3: Choose your own adventure story.")
         print("4: trivia")
         print("5: Scrabble")
